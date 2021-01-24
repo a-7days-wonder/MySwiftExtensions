@@ -1,0 +1,2 @@
+# MySwiftExtensions
+Swiftでよく使いそうなExtensionをまとめる
