@@ -1,5 +1,5 @@
 public struct MySwiftExtensions<Base> {
-    private let base: Base
+    let base: Base
     
     public init(_ base: Base) {
         self.base = base
