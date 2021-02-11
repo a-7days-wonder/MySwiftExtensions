@@ -18,11 +18,17 @@ extension MySwiftExtensions where Base: UIView {
      - Returns: かけた制約
      */
     @discardableResult
-    public func addConstraint<Anchor: NSLayoutAnchor<Axis>, Axis>(from originAnchor: KeyPath<UIView, Anchor>, to destinationAnchor: KeyPath<UIView, Anchor>, of view: UIView, with constant: CGFloat) -> NSLayoutConstraint {
+    public func addConstraint<Anchor: NSLayoutAnchor<Axis>, Axis>(
+        from originAnchor: KeyPath<UIView, Anchor>,
+        to destinationAnchor: KeyPath<UIView, Anchor>,
+        of view: UIView,
+        with constant: CGFloat = 0.0
+    ) -> NSLayoutConstraint {
         view.translatesAutoresizingMaskIntoConstraints = false
-        let constraint = base[keyPath: originAnchor].constraint(equalTo: view[keyPath: destinationAnchor], constant: constant)
-        base.addConstraint(constraint)
-        return constraint
+        return {
+            NSLayoutConstraint.activate([$0])
+            return $0
+        }(base[keyPath: originAnchor].constraint(equalTo: view[keyPath: destinationAnchor], constant: constant))
     }
     
     /**
@@ -34,7 +40,11 @@ extension MySwiftExtensions where Base: UIView {
      - Returns: かけた制約
      */
     @discardableResult
-    public func addConstraint<Anchor: NSLayoutAnchor<Axis>, Axis>(to anchor: KeyPath<UIView, Anchor>, of view: UIView, with constant: CGFloat) -> NSLayoutConstraint {
+    public func addConstraint<Anchor: NSLayoutAnchor<Axis>, Axis>(
+        to anchor: KeyPath<UIView, Anchor>,
+        of view: UIView,
+        with constant: CGFloat = 0.0
+    ) -> NSLayoutConstraint {
         addConstraint(from: anchor, to: anchor, of: view, with: constant)
     }
     
@@ -44,52 +54,89 @@ extension MySwiftExtensions where Base: UIView {
         - originDimension: 制約をかけるbaseのNSLayoutDimensionを指すKeyPath
         - destinationDimension: 制約をかけるviewのNSLayoutDimensionを指すKeyPath
         - view: 制約をかける対象のUIView
+        - multiplier: 制約の倍率
         - constant: 制約の値
      - Returns: かけた制約
      */
     @discardableResult
-    public func addConstraint(from originDimension: KeyPath<UIView, NSLayoutDimension>, to destinationDimension: KeyPath<UIView, NSLayoutDimension>, of view: UIView, with constant: CGFloat) -> NSLayoutConstraint {
+    public func addConstraint(
+        from originDimension: KeyPath<UIView, NSLayoutDimension>,
+        to destinationDimension: KeyPath<UIView, NSLayoutDimension>,
+        of view: UIView,
+        by multiplier: CGFloat = 1.0,
+        with constant: CGFloat = 0.0
+    ) -> NSLayoutConstraint {
         view.translatesAutoresizingMaskIntoConstraints = false
-        let constraint = base[keyPath: originDimension].constraint(equalTo: view[keyPath: destinationDimension], constant: constant)
-        base.addConstraint(constraint)
-        return constraint
+        return {
+            NSLayoutConstraint.activate([$0])
+            return $0
+        }(base[keyPath: originDimension].constraint(equalTo: view[keyPath: destinationDimension], multiplier: multiplier, constant: constant))
     }
     
     /**
      baseとviewの同じdimensionに制約をかける
      - Parameters:
-        - anchor: 制約をかけるNSLayoutDimensionを指すKeyPath
+        - dimension: 制約をかけるNSLayoutDimensionを指すKeyPath
         - view: 制約をかける対象のUIView
+        - multiplier: 制約の倍率
         - constant: 制約の値
      - Returns: かけた制約
      */
     @discardableResult
-    public func addConstraint(to dimension: KeyPath<UIView, NSLayoutDimension>, of view: UIView, with constant: CGFloat) -> NSLayoutConstraint {
-        addConstraint(from: dimension, to: dimension, of: view, with: constant)
+    public func addConstraint(
+        to dimension: KeyPath<UIView, NSLayoutDimension>,
+        of view: UIView,
+        by multiplier: CGFloat = 1.0,
+        with constant: CGFloat = 0.0
+    ) -> NSLayoutConstraint {
+        addConstraint(from: dimension, to: dimension, of: view, by: multiplier, with: constant)
     }
     
     /**
      baseのdimensionに制約をかける
      - Parameters:
-        - anchor: 制約をかけるNSLayoutDimensionを指すKeyPath
+        - originDimension: 制約をかけるbaseのNSLayoutDimensionを指すKeyPath
+        - destinationDimension: 制約をかけるviewのNSLayoutDimensionを指すKeyPath
+        - multiplier: 制約の倍率
         - constant: 制約の値
      - Returns: かけた制約
      */
     @discardableResult
-    public func addConstraint(to dimension: KeyPath<UIView, NSLayoutDimension>, with constant: CGFloat) -> NSLayoutConstraint {
+    public func addConstraint(
+        from originDimension: KeyPath<UIView, NSLayoutDimension>,
+        to destinationDimension: KeyPath<UIView, NSLayoutDimension>,
+        by multiplier: CGFloat = 1.0,
+        with constant: CGFloat = 0.0
+    ) -> NSLayoutConstraint {
+        addConstraint(from: originDimension, to: destinationDimension, of: base, by: multiplier, with: constant)
+    }
+    
+    /**
+     baseのdimensionに制約をかける
+     - Parameters:
+        - dimension: 制約をかけるNSLayoutDimensionを指すKeyPath
+        - constant: 制約の値
+     - Returns: かけた制約
+     */
+    @discardableResult
+    public func addConstraint(
+        to dimension: KeyPath<UIView, NSLayoutDimension>,
+        with constant: CGFloat
+    ) -> NSLayoutConstraint {
         base.translatesAutoresizingMaskIntoConstraints = false
-        let constraint = base[keyPath: dimension].constraint(equalToConstant: constant)
-        base.addConstraint(constraint)
-        return constraint
+        return {
+            NSLayoutConstraint.activate([$0])
+            return $0
+        }(base[keyPath: dimension].constraint(equalToConstant: constant))
     }
     
     /**
      baseにsuperviewがあったら、それに合わせた制約をかける
      */
     public func fillToSuperview() {
-        base.superview?.ex.addConstraint(to: \.topAnchor, of: base, with: 0)
-        base.superview?.ex.addConstraint(to: \.leftAnchor, of: base, with: 0)
-        base.superview?.ex.addConstraint(to: \.rightAnchor, of: base, with: 0)
-        base.superview?.ex.addConstraint(to: \.bottomAnchor, of: base, with: 0)
+        base.superview?.ex.addConstraint(to: \.topAnchor, of: base)
+        base.superview?.ex.addConstraint(to: \.leftAnchor, of: base)
+        base.superview?.ex.addConstraint(to: \.rightAnchor, of: base)
+        base.superview?.ex.addConstraint(to: \.bottomAnchor, of: base)
     }
 }
