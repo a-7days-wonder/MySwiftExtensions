@@ -139,4 +139,26 @@ extension MySwiftExtensions where Base: UIView {
         base.superview?.ex.addConstraint(to: \.rightAnchor, of: base)
         base.superview?.ex.addConstraint(to: \.bottomAnchor, of: base)
     }
+    
+    /**
+     XibからUIViewを生成する
+     - Returns: Xibから生成したUIView
+     */
+    public func loadViewFromNib() -> UIView {
+        UINib(nibName: className, bundle: .init(for: Base.self))
+            .instantiate(withOwner: base, options: nil)
+            .first as! UIView
+    }
+    
+    /**
+     XibからViewを読み込み、addSubviewする
+     - Returns: Xibから読み込み、addSubviewされたUIView
+     */
+    @discardableResult
+    public func addSubviewFromNib() -> UIView {
+        let view = loadViewFromNib()
+        base.addSubview(view)
+        view.ex.fillToSuperview()
+        return view
+    }
 }

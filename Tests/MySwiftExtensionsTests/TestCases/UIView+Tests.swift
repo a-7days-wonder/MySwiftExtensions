@@ -43,4 +43,12 @@ class UIViewTests: XCTestCase {
         XCTAssertEqual(parentView.frame.size, .init(width: 200, height: 200))
         XCTAssertEqual(parentView.bounds.size, childView.frame.size)
     }
+    
+    func testAddSubviewFromNib() {
+        let view = XibTestView()
+        XCTAssertTrue(view.subviews.isEmpty)
+        
+        view.ex.addSubviewFromNib()
+        XCTAssertFalse(view.subviews.isEmpty)
+    }
 }
